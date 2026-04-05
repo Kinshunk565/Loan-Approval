@@ -1,0 +1,21 @@
+{
+  "Credit_History": 0.575947,
+  "Education": 0.088547,
+  "Property_Area": 0.035284,
+  "Dependents": 0.030081,
+  "Married": 0.026774,
+  "Self_Employed": 0.02282,
+  "LogLoanAmount": 0.022349,
+  "LoanIncomePercent": 0.019946,
+  "TotalIncome": 0.019672,
+  "BalanceIncome": 0.018801,
+  "LoanAmount": 0.018615,
+  "ApplicantIncome": 0.017965,
+  "LogApplicantIncome": 0.017864,
+  "EMI": 0.017588,
+  "IncomeToLoanRatio": 0.017347,
+  "LogTotalIncome": 0.016952,
+  "CoapplicantIncome": 0.015674,
+  "Gender": 0.011775,
+  "Loan_Amount_Term": 0.006001
+}

@@ -1,0 +1,103 @@
+{
+  "shape": [
+    5000,
+    13
+  ],
+  "approval_rate": 0.6296,
+  "missing_values": {
+    "Loan_ID": 0,
+    "Gender": 87,
+    "Married": 30,
+    "Dependents": 130,
+    "Education": 0,
+    "Self_Employed": 266,
+    "ApplicantIncome": 0,
+    "CoapplicantIncome": 0,
+    "LoanAmount": 179,
+    "Loan_Amount_Term": 100,
+    "Credit_History": 397,
+    "Property_Area": 0,
+    "Loan_Status": 0
+  },
+  "dtypes": {
+    "Loan_ID": "str",
+    "Gender": "str",
+    "Married": "str",
+    "Dependents": "str",
+    "Education": "str",
+    "Self_Employed": "str",
+    "ApplicantIncome": "int64",
+    "CoapplicantIncome": "int64",
+    "LoanAmount": "float64",
+    "Loan_Amount_Term": "float64",
+    "Credit_History": "float64",
+    "Property_Area": "str",
+    "Loan_Status": "str"
+  },
+  "numerical_stats": {
+    "ApplicantIncome": {
+      "mean": 5049.7058,
+      "median": 4007.5,
+      "std": 3841.6885567468594,
+      "min": 1000.0,
+      "max": 50410.0
+    },
+    "CoapplicantIncome": {
+      "mean": 1128.3676,
+      "median": 0.0,
+      "std": 2043.5945556327463,
+      "min": 0.0,
+      "max": 26467.0
+    },
+    "LoanAmount": {
+      "mean": 288.91184401576436,
+      "median": 237.0,
+      "std": 191.09724748029458,
+      "min": 20.0,
+      "max": 700.0
+    },
+    "Loan_Amount_Term": {
+      "mean": 316.56979591836733,
+      "median": 360.0,
+      "std": 98.14615693965848,
+      "min": 12.0,
+      "max": 480.0
+    },
+    "Credit_History": {
+      "mean": 0.8574842494025635,
+      "median": 1.0,
+      "std": 0.3496163128207403,
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "categorical_stats": {
+    "Gender": {
+      "Male": 3927,
+      "Female": 986
+    },
+    "Married": {
+      "Yes": 3324,
+      "No": 1646
+    },
+    "Dependents": {
+      "0": 2687,
+      "2": 847,
+      "1": 795,
+      "3+": 541
+    },
+    "Education": {
+      "Graduate": 3899,
+      "Not Graduate": 1101
+    },
+    "Self_Employed": {
+      "No": 4093,
+      "Yes": 641
+    },
+    "Property_Area": {
+      "Semiurban": 1914,
+      "Urban": 1643,
+      "Rural": 1443
+    }
+  }
+}

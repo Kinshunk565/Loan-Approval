@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: loan-approval-predictor
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python -m src.model_training
+    startCommand: streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
