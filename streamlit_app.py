@@ -20,8 +20,8 @@ import sys
 
 # --- PAGE CONFIG ---
 st.set_page_config(
-    page_title="Loan Approval Predictor | ML Dashboard",
-    page_icon="🏦",
+    page_title="Loan Intelligence | Premium ML Dashboard",
+    page_icon="💎",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -32,223 +32,341 @@ MODELS_DIR = os.path.join(BASE_DIR, "models")
 DATA_DIR = os.path.join(BASE_DIR, "data")
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
-# --- PREMIUM CSS ---
+# --- PREMIUM VIBRANT LIGHT CSS ---
 st.markdown("""
 <style>
     /* ===== GLOBAL STYLES ===== */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap');
     
     .stApp {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Lexend', sans-serif;
+        background-color: #f8fafc;
+        color: #1e293b;
     }
     
-    /* Dark gradient background */
-    .stApp > header {
-        background: transparent;
-    }
-    
+    /* Elegant Sidebar (Deep Violet/Emerald) */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 50%, #16213e 100%);
+        background: linear-gradient(180deg, #1e1b4b 0%, #064e3b 100%);
+        box-shadow: 4px 0 15px rgba(0,0,0,0.1);
     }
     
     [data-testid="stSidebar"] .stMarkdown, 
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] .stSelectbox label,
     [data-testid="stSidebar"] span {
-        color: #e0e0e0 !important;
+        color: #f1f5f9 !important;
+    }
+
+    [data-testid="stSidebar"] hr {
+        border-top-color: rgba(255,255,255,0.1) !important;
     }
     
-    /* ===== HERO HEADER ===== */
+    /* ===== HERO HEADER (Vibrant Mesh Flow) ===== */
     .hero-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-        border-radius: 20px;
-        padding: 40px 50px;
-        margin-bottom: 30px;
+        background: linear-gradient(-45deg, #7c3aed, #10b981, #f43f5e, #8b5cf6);
+        background-size: 400% 400%;
+        animation: gradientFlow 15s ease infinite;
+        border-radius: 32px;
+        padding: 65px;
+        margin-bottom: 50px;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 30px 60px -12px rgba(124, 58, 237, 0.3);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
-    
-    .hero-container::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -30%;
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        border-radius: 50%;
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        background: rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(12px);
+        padding: 40px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        width: fit-content;
+        animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
     
     .hero-title {
-        font-size: 2.8rem;
-        font-weight: 900;
+        font-size: 3.8rem;
+        font-weight: 950;
         color: #ffffff;
         margin: 0;
-        line-height: 1.2;
-        letter-spacing: -1px;
+        line-height: 1.1;
+        letter-spacing: -2.5px;
+        text-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        animation: slideInLeft 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .hero-title span {
+        color: #10b981;
+        text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-40px); }
+        to { opacity: 1; transform: translateX(0); }
     }
     
     .hero-subtitle {
-        font-size: 1.15rem;
-        color: rgba(255,255,255,0.85);
-        margin-top: 10px;
+        font-size: 1.4rem;
+        color: rgba(255,255,255,0.95);
+        margin-top: 25px;
         font-weight: 400;
+        max-width: 800px;
         line-height: 1.6;
+        animation: fadeIn 1.2s ease-out 0.3s both;
     }
     
-    /* ===== METRIC CARDS ===== */
+    /* ===== PREMIUM CARDS (Glass Glow) ===== */
     .metric-card {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        border-radius: 16px;
-        padding: 24px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 24px;
+        padding: 30px;
         text-align: center;
-        border: 1px solid rgba(102, 126, 234, 0.3);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeIn 0.8s ease-out;
     }
     
     .metric-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.2);
+        border-color: #10b981;
     }
     
     .metric-value {
-        font-size: 2.2rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+        font-size: 2.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #059669 0%, #7c3aed 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
     
     .metric-label {
-        font-size: 0.85rem;
-        color: #8892b0;
+        font-size: 0.9rem;
+        color: #64748b;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
-        margin-top: 8px;
-        font-weight: 600;
+        letter-spacing: 3px;
+        margin-top: 12px;
+        font-weight: 700;
     }
     
-    /* ===== PREDICTION CARD ===== */
+    /* ===== PREDICTION COMPONENTS ===== */
     .prediction-approved {
-        background: linear-gradient(135deg, #00c853 0%, #64dd17 100%);
-        border-radius: 20px;
-        padding: 40px;
+        background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
+        border: 3px solid #10b981;
+        border-radius: 30px;
+        padding: 50px;
         text-align: center;
-        box-shadow: 0 20px 60px rgba(0, 200, 83, 0.3);
-        animation: pulse-green 2s infinite;
+        box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15);
+        animation: float 5s ease-in-out infinite;
     }
     
     .prediction-rejected {
-        background: linear-gradient(135deg, #ff1744 0%, #ff6d00 100%);
-        border-radius: 20px;
-        padding: 40px;
+        background: linear-gradient(135deg, #fff1f2 0%, #ffffff 100%);
+        border: 3px solid #f43f5e;
+        border-radius: 30px;
+        padding: 50px;
         text-align: center;
-        box-shadow: 0 20px 60px rgba(255, 23, 68, 0.3);
-        animation: pulse-red 2s infinite;
+        box-shadow: 0 20px 40px rgba(244, 63, 94, 0.15);
     }
     
-    @keyframes pulse-green {
-        0%, 100% { box-shadow: 0 20px 60px rgba(0, 200, 83, 0.3); }
-        50% { box-shadow: 0 20px 80px rgba(0, 200, 83, 0.5); }
-    }
-    
-    @keyframes pulse-red {
-        0%, 100% { box-shadow: 0 20px 60px rgba(255, 23, 68, 0.3); }
-        50% { box-shadow: 0 20px 80px rgba(255, 23, 68, 0.5); }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(0.5deg); }
     }
     
     .prediction-status {
-        font-size: 3rem;
-        font-weight: 900;
-        color: white;
-        margin: 0;
+        font-size: 4rem;
+        font-weight: 950;
+        color: #064e3b;
+        margin: 15px 0;
+        letter-spacing: -2px;
     }
     
     .prediction-confidence {
-        font-size: 1.3rem;
-        color: rgba(255,255,255,0.9);
-        margin-top: 8px;
+        font-size: 1.4rem;
+        color: #64748b;
+        font-weight: 500;
     }
     
     /* ===== FACTOR CARDS ===== */
     .factor-positive {
-        background: linear-gradient(135deg, rgba(0, 200, 83, 0.1) 0%, rgba(100, 221, 23, 0.1) 100%);
-        border-left: 4px solid #00c853;
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin: 8px 0;
+        background: #f0fdf4;
+        border-left: 5px solid #22c55e;
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin: 12px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     }
     
     .factor-negative {
-        background: linear-gradient(135deg, rgba(255, 23, 68, 0.1) 0%, rgba(255, 109, 0, 0.1) 100%);
-        border-left: 4px solid #ff1744;
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin: 8px 0;
+        background: #fef2f2;
+        border-left: 5px solid #ef4444;
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin: 12px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     }
     
     .factor-neutral {
-        background: linear-gradient(135deg, rgba(255, 171, 0, 0.1) 0%, rgba(255, 214, 0, 0.1) 100%);
-        border-left: 4px solid #ffab00;
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin: 8px 0;
+        background: #fffbeb;
+        border-left: 5px solid #f59e0b;
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin: 12px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     }
     
-    /* ===== SECTION HEADERS ===== */
+    /* ===== SECTION HEADERS (Animated Accent) ===== */
     .section-header {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #ccd6f6;
-        margin: 30px 0 20px 0;
-        padding-bottom: 12px;
-        border-bottom: 3px solid;
-        border-image: linear-gradient(135deg, #667eea, #764ba2, #f093fb) 1;
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: #1e293b;
+        margin: 50px 0 30px 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        animation: slideInLeft 0.8s ease-out;
     }
     
-    /* ===== FOOTER ===== */
+    .section-header::before {
+        content: '';
+        width: 15px;
+        height: 15px;
+        background: #10b981;
+        border-radius: 4px;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    }
+    
+    /* ===== FOOTER (Premium) ===== */
     .footer {
         text-align: center;
-        padding: 30px;
-        margin-top: 50px;
-        border-top: 1px solid rgba(102, 126, 234, 0.2);
-        color: #8892b0;
-        font-size: 0.85rem;
+        padding: 60px;
+        margin-top: 100px;
+        background: #ffffff;
+        border-top: 1px solid #f1f5f9;
+        color: #64748b;
     }
     
     .footer a {
-        color: #667eea;
+        color: #7c3aed;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 800;
+        transition: all 0.3s ease;
     }
-    
-    /* ===== TABS ===== */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+
+    .footer a:hover {
+        color: #10b981;
+        text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
     }
-    
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 10px;
-        padding: 10px 20px;
-        font-weight: 600;
+
+    /* Streamlit Overrides (Professional) */
+    .stButton > button {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 12px 30px !important;
+        border-radius: 50px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1.5px !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+        width: 100%;
     }
-    
-    /* ===== RISK GAUGE ===== */
-    .risk-badge {
-        display: inline-block;
-        padding: 8px 20px;
-        border-radius: 30px;
-        font-weight: 700;
-        font-size: 1rem;
-        letter-spacing: 1px;
+
+    .stButton > button:hover {
+        transform: translateY(-5px) scale(1.02) !important;
+        box-shadow: 0 12px 30px rgba(16, 185, 129, 0.45) !important;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
     }
+
+    .stButton > button:active {
+        transform: translateY(2px) !important;
+    }
+
+    /* Input Fields (Professional) */
+    .stTextInput input, .stSelectbox [data-baseweb="select"], .stNumberInput input {
+        border-radius: 12px !important;
+        border: 2px solid #f1f5f9 !important;
+        background-color: white !important;
+        padding: 10px 15px !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .stTextInput input:focus, .stSelectbox [data-baseweb="select"]:focus {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1) !important;
+    }
+
+    .stMetric {
+        background: white;
+        padding: 24px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+        border: 1px solid #f1f5f9;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .stMetric:hover { transform: translateY(-8px) scale(1.05); }
+
+    /* Sidebar Radio Styling */
+    [data-testid="stSidebarNav"] { padding-top: 20px; }
     
-    /* Hide default Streamlit footer */
+    div[data-testid="stSidebarUserContent"] .stRadio > div {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 20px 10px;
+    }
+
+    div[data-testid="stSidebarUserContent"] .stRadio label {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        color: #94a3b8 !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        width: 100% !important;
+    }
+
+    div[data-testid="stSidebarUserContent"] .stRadio label:hover {
+        background: rgba(16, 185, 129, 0.1) !important;
+        border-color: #10b981 !important;
+        color: white !important;
+        transform: translateX(5px);
+    }
+
+    div[data-testid="stSidebarUserContent"] .stRadio div[data-testid="stMarkdownContainer"] p {
+        font-weight: 600 !important;
+    }
+
+    /* Active State for Sidebar Radio */
+    [data-testid="stSidebarNav"] .st-ea, div[data-testid="stSidebarUserContent"] .stRadio label[data-checked="true"] {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+    }
+
+    /* Hide default Streamlit elements */
     footer {visibility: hidden;}
     #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -306,13 +424,13 @@ def create_gauge_chart(value, title="Approval Probability"):
             'bgcolor': 'rgba(0,0,0,0)',
             'borderwidth': 0,
             'steps': [
-                {'range': [0, 30], 'color': 'rgba(255, 23, 68, 0.3)'},
-                {'range': [30, 55], 'color': 'rgba(255, 171, 0, 0.3)'},
-                {'range': [55, 75], 'color': 'rgba(100, 221, 23, 0.3)'},
-                {'range': [75, 100], 'color': 'rgba(0, 200, 83, 0.3)'}
+                {'range': [0, 30], 'color': 'rgba(244, 63, 94, 0.3)'},
+                {'range': [30, 55], 'color': 'rgba(245, 158, 11, 0.3)'},
+                {'range': [55, 75], 'color': 'rgba(16, 185, 129, 0.3)'},
+                {'range': [75, 100], 'color': 'rgba(5, 150, 105, 0.3)'}
             ],
             'threshold': {
-                'line': {'color': '#f093fb', 'width': 4},
+                'line': {'color': '#7c3aed', 'width': 4},
                 'thickness': 0.8,
                 'value': value
             }
@@ -321,7 +439,7 @@ def create_gauge_chart(value, title="Approval Probability"):
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font={'color': '#ccd6f6'},
+        font={'color': '#1e293b'},
         height=280,
         margin=dict(l=20, r=20, t=50, b=20)
     )
@@ -330,13 +448,13 @@ def create_gauge_chart(value, title="Approval Probability"):
 
 # === SIDEBAR NAVIGATION ===
 st.sidebar.markdown("""
-<div style="text-align: center; padding: 20px 0;">
-    <div style="font-size: 3rem;">🏦</div>
-    <div style="font-size: 1.1rem; font-weight: 700; color: #ccd6f6; margin-top: 5px;">
-        Loan Predictor
+<div style="text-align: center; padding: 25px 0;">
+    <div style="font-size: 3.5rem; filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.6));">🍃</div>
+    <div style="font-size: 1.4rem; font-weight: 800; color: #ffffff; margin-top: 10px; letter-spacing: -0.5px;">
+        EcoLoan Intel
     </div>
-    <div style="font-size: 0.75rem; color: #8892b0; letter-spacing: 2px;">
-        ML DASHBOARD
+    <div style="font-size: 0.75rem; color: #10b981; letter-spacing: 3px; font-weight: 700;">
+        PREMIUM GROWTH DASHBOARD
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -366,11 +484,13 @@ if page == "🏠 Home":
     # Hero
     st.markdown("""
     <div class="hero-container">
-        <p class="hero-title">🏦 Loan Approval<br>Prediction System</p>
-        <p class="hero-subtitle">
-            AI-powered credit risk assessment platform using advanced Machine Learning.<br>
-            Analyze applicant profiles, predict loan eligibility, and understand risk factors — all in real-time.
-        </p>
+        <div class="hero-content">
+            <p class="hero-title">Smart <span>Loan<br>Intelligence</span> System</p>
+            <p class="hero-subtitle">
+                Unlock higher precision with our next-generation credit risk assessment engine. 
+                Experience real-time applicant profiling powered by sophisticated Machine Learning.
+            </p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -462,21 +582,21 @@ if page == "🏠 Home":
         fig = go.Figure(data=[go.Pie(
             labels=labels,
             values=status_counts.values,
-            hole=0.6,
-            marker=dict(colors=['#667eea', '#ff6b6b']),
+            hole=0.65,
+            marker=dict(colors=['#10b981', '#f43f5e']),
             textinfo='label+percent',
             textfont=dict(size=14, color='white')
         )])
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#ccd6f6'),
-            height=350,
+            font=dict(color='#1e293b'),
+            height=380,
             showlegend=False,
             annotations=[dict(
                 text=f"<b>{len(df):,}</b><br>Total",
-                x=0.5, y=0.5, font_size=20, showarrow=False,
-                font=dict(color='#ccd6f6')
+                x=0.5, y=0.5, font_size=22, showarrow=False,
+                font=dict(color='#1e293b')
             )]
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -487,9 +607,11 @@ if page == "🏠 Home":
 # ============================================================
 elif page == "📊 EDA & Insights":
     st.markdown("""
-    <div class="hero-container" style="padding: 30px 40px;">
-        <p class="hero-title" style="font-size: 2rem;">📊 Exploratory Data Analysis</p>
-        <p class="hero-subtitle">Deep dive into the loan dataset — distributions, correlations, and key patterns</p>
+    <div class="hero-container" style="padding: 40px 60px;">
+        <div class="hero-content" style="padding: 25px 35px;">
+            <p class="hero-title" style="font-size: 2.2rem;">📊 Exploratory <span>Data Analysis</span></p>
+            <p class="hero-subtitle" style="font-size: 1.1rem; margin-top: 10px;">Deep dive into the loan dataset — distributions, correlations, and key patterns</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -521,19 +643,19 @@ elif page == "📊 EDA & Insights":
             y=missing.values.tolist(),
             marker=dict(
                 color=missing.values.tolist(),
-                colorscale=[[0, '#667eea'], [1, '#f093fb']],
+                colorscale=[[0, '#10b981'], [1, '#7c3aed']],
                 showscale=False
             ),
             text=[f"{v} ({v/len(df)*100:.1f}%)" for v in missing.values],
             textposition='outside',
-            textfont=dict(color='#ccd6f6')
+            textfont=dict(color='#1e293b')
         ))
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#ccd6f6'),
-            xaxis=dict(title='Feature', gridcolor='rgba(255,255,255,0.1)'),
-            yaxis=dict(title='Missing Count', gridcolor='rgba(255,255,255,0.1)'),
+            font=dict(color='#1e293b'),
+            xaxis=dict(title='Feature', gridcolor='#e2e8f0'),
+            yaxis=dict(title='Missing Count', gridcolor='#e2e8f0'),
             height=350,
             margin=dict(t=30)
         )
@@ -560,35 +682,35 @@ elif page == "📊 EDA & Insights":
         fig = px.bar(
             grouped, x=selected_cat, y='Approval Rate (%)',
             color='Approval Rate (%)',
-            color_continuous_scale=['#ff6b6b', '#ffab00', '#667eea', '#00c853'],
+            color_continuous_scale=['#f43f5e', '#f59e0b', '#6366f1', '#22c55e'],
             text='Approval Rate (%)'
         )
         fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside',
-                         textfont_color='#ccd6f6')
+                         textfont_color='#1e293b')
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#ccd6f6'),
-            xaxis=dict(gridcolor='rgba(255,255,255,0.05)'),
-            yaxis=dict(gridcolor='rgba(255,255,255,0.1)', range=[0, 110]),
+            font=dict(color='#1e293b'),
+            xaxis=dict(gridcolor='#f1f5f9'),
+            yaxis=dict(gridcolor='#e2e8f0', range=[0, 110]),
             coloraxis_showscale=False,
             height=400,
-            title=dict(text=f"Approval Rate by {selected_cat}", font=dict(color='#ccd6f6'))
+            title=dict(text=f"Approval Rate by {selected_cat}", font=dict(color='#1e293b'))
         )
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         fig = px.pie(
             counts, values='Count', names=selected_cat,
-            color_discrete_sequence=['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe']
+            color_discrete_sequence=['#10b981', '#7c3aed', '#f43f5e', '#f59e0b', '#064e3b']
         )
         fig.update_traces(textinfo='label+percent', textfont=dict(color='white'))
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#ccd6f6'),
+            font=dict(color='#1e293b'),
             height=400,
-            title=dict(text=f"Distribution of {selected_cat}", font=dict(color='#ccd6f6'))
+            title=dict(text=f"Distribution of {selected_cat}", font=dict(color='#1e293b'))
         )
         st.plotly_chart(fig, use_container_width=True)
     
@@ -601,7 +723,7 @@ elif page == "📊 EDA & Insights":
         fig = px.histogram(
             df, x='ApplicantIncome', nbins=50,
             color='Loan_Status',
-            color_discrete_map={'Y': '#667eea', 'N': '#ff6b6b'},
+            color_discrete_map={'Y': '#10b981', 'N': '#f43f5e'},
             marginal='box',
             labels={'Loan_Status': 'Status'},
             barmode='overlay',
@@ -610,11 +732,11 @@ elif page == "📊 EDA & Insights":
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#ccd6f6'),
-            xaxis=dict(gridcolor='rgba(255,255,255,0.05)'),
-            yaxis=dict(gridcolor='rgba(255,255,255,0.1)'),
+            font=dict(color='#1e293b'),
+            xaxis=dict(gridcolor='#f1f5f9'),
+            yaxis=dict(gridcolor='#e2e8f0'),
             height=400,
-            title=dict(text="Applicant Income Distribution", font=dict(color='#ccd6f6'))
+            title=dict(text="Applicant Income Distribution", font=dict(color='#1e293b'))
         )
         st.plotly_chart(fig, use_container_width=True)
     
@@ -648,15 +770,15 @@ elif page == "📊 EDA & Insights":
     fig = px.imshow(
         corr,
         text_auto='.2f',
-        color_continuous_scale=['#1a1a2e', '#667eea', '#f093fb'],
+        color_continuous_scale=['#f9fafb', '#10b981', '#7c3aed'],
         aspect='auto'
     )
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#ccd6f6'),
+        font=dict(color='#1e293b'),
         height=500,
-        title=dict(text="Correlation Heatmap", font=dict(color='#ccd6f6'))
+        title=dict(text="Correlation Heatmap", font=dict(color='#1e293b'))
     )
     st.plotly_chart(fig, use_container_width=True)
     
@@ -693,9 +815,11 @@ elif page == "📊 EDA & Insights":
 # ============================================================
 elif page == "🤖 Model Performance":
     st.markdown("""
-    <div class="hero-container" style="padding: 30px 40px;">
-        <p class="hero-title" style="font-size: 2rem;">🤖 Model Performance</p>
-        <p class="hero-subtitle">Compare 5 ML models trained with GridSearchCV and 5-fold cross-validation</p>
+    <div class="hero-container" style="padding: 40px 60px;">
+        <div class="hero-content" style="padding: 25px 35px;">
+            <p class="hero-title" style="font-size: 2.2rem;">🤖 Model <span>Performance</span></p>
+            <p class="hero-subtitle" style="font-size: 1.1rem; margin-top: 10px;">Compare 5 ML models trained with GridSearchCV and 5-fold cross-validation</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -709,10 +833,10 @@ elif page == "🤖 Model Performance":
     
     # Best Model Highlight
     st.markdown(f"""
-    <div class="metric-card" style="text-align: center; margin-bottom: 30px;">
-        <div style="font-size: 1rem; color: #8892b0; text-transform: uppercase; letter-spacing: 2px;">🏆 Champion Model</div>
-        <div class="metric-value" style="font-size: 2.5rem;">{best_model}</div>
-        <div style="color: #8892b0; margin-top: 5px;">
+    <div class="metric-card" style="text-align: center; margin-bottom: 30px; border: 2px solid #6366f1;">
+        <div style="font-size: 0.9rem; color: #64748b; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 700;">🏆 Champion Model</div>
+        <div class="metric-value" style="font-size: 2.8rem;">{best_model}</div>
+        <div style="color: #64748b; margin-top: 10px; font-weight: 500;">
             AUC: {models_data.get(best_model, {}).get('auc_roc', 0):.4f} &nbsp;|&nbsp; 
             Accuracy: {models_data.get(best_model, {}).get('accuracy', 0):.4f} &nbsp;|&nbsp; 
             F1: {models_data.get(best_model, {}).get('f1_score', 0):.4f}
@@ -746,7 +870,7 @@ elif page == "🤖 Model Performance":
     model_names_list = list(models_data.keys())
     
     fig = go.Figure()
-    colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe']
+    colors = ['#10b981', '#7c3aed', '#f59e0b', '#f43f5e', '#064e3b']
     
     for i, metric in enumerate(metric_names):
         values = [models_data[m].get(metric, 0) for m in model_names_list]
@@ -757,16 +881,16 @@ elif page == "🤖 Model Performance":
             marker_color=colors[i],
             text=[f"{v:.3f}" for v in values],
             textposition='outside',
-            textfont=dict(color='#ccd6f6', size=10)
+            textfont=dict(color='#1e293b', size=11)
         ))
     
     fig.update_layout(
         barmode='group',
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#ccd6f6'),
-        xaxis=dict(gridcolor='rgba(255,255,255,0.05)'),
-        yaxis=dict(gridcolor='rgba(255,255,255,0.1)', range=[0, 1.15]),
+        font=dict(color='#1e293b'),
+        xaxis=dict(gridcolor='#f1f5f9'),
+        yaxis=dict(gridcolor='#e2e8f0', range=[0, 1.15]),
         height=450,
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='center', x=0.5)
     )
@@ -798,11 +922,11 @@ elif page == "🤖 Model Performance":
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#ccd6f6'),
-        xaxis=dict(title='False Positive Rate', gridcolor='rgba(255,255,255,0.1)'),
-        yaxis=dict(title='True Positive Rate', gridcolor='rgba(255,255,255,0.1)'),
+        font=dict(color='#1e293b'),
+        xaxis=dict(title='False Positive Rate', gridcolor='#f1f5f9'),
+        yaxis=dict(title='True Positive Rate', gridcolor='#f1f5f9'),
         height=500,
-        legend=dict(bgcolor='rgba(0,0,0,0.3)')
+        legend=dict(bgcolor='rgba(255,255,255,0.7)')
     )
     st.plotly_chart(fig, use_container_width=True)
     
@@ -818,15 +942,15 @@ elif page == "🤖 Model Performance":
         x=['Rejected', 'Approved'],
         y=['Rejected', 'Approved'],
         text_auto=True,
-        color_continuous_scale=['#1a1a2e', '#667eea', '#f093fb'],
+        color_continuous_scale=['#f9fafb', '#10b981', '#7c3aed'],
         aspect='auto'
     )
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#ccd6f6'),
+        font=dict(color='#1e293b'),
         height=400,
-        title=dict(text=f"Confusion Matrix — {selected_model}", font=dict(color='#ccd6f6'))
+        title=dict(text=f"Confusion Matrix — {selected_model}", font=dict(color='#1e293b'))
     )
     st.plotly_chart(fig, use_container_width=True)
     
@@ -850,9 +974,11 @@ elif page == "🤖 Model Performance":
 # ============================================================
 elif page == "🔮 Live Prediction":
     st.markdown("""
-    <div class="hero-container" style="padding: 30px 40px;">
-        <p class="hero-title" style="font-size: 2rem;">🔮 Live Loan Prediction</p>
-        <p class="hero-subtitle">Enter applicant details to get instant AI-powered loan approval prediction with risk analysis</p>
+    <div class="hero-container" style="padding: 40px 60px;">
+        <div class="hero-content" style="padding: 25px 35px;">
+            <p class="hero-title" style="font-size: 2.2rem;">🔮 Live <span>Loan Prediction</span></p>
+            <p class="hero-subtitle" style="font-size: 1.1rem; margin-top: 10px;">Enter applicant details to get instant AI-powered loan approval prediction with risk analysis</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -865,6 +991,7 @@ elif page == "🔮 Live Prediction":
     # --- Input Form ---
     st.markdown('<div class="section-header">📝 Applicant Information</div>', unsafe_allow_html=True)
     
+    st.markdown('<div class="metric-card" style="text-align: left; padding: 40px; margin-bottom: 30px; background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0;">', unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -903,6 +1030,7 @@ elif page == "🔮 Live Prediction":
             min_value=9, max_value=700, value=150, step=10,
             key="pred_loan"
         )
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Summary before prediction
     st.markdown("---")
@@ -955,11 +1083,11 @@ elif page == "🔮 Live Prediction":
             if result['approved']:
                 st.markdown(f"""
                 <div class="prediction-approved">
-                    <p style="font-size: 3rem; margin: 0;">✅</p>
-                    <p class="prediction-status">LOAN APPROVED</p>
-                    <p class="prediction-confidence">Confidence: {result['approval_probability']}%</p>
-                    <div class="risk-badge" style="background: rgba(255,255,255,0.2); color: white; margin-top: 15px;">
-                        {result['risk_level']}
+                    <p style="font-size: 3.5rem; margin: 0; filter: drop-shadow(0 0 10px rgba(16,185,129,0.3));">✅</p>
+                    <p class="prediction-status">ELIGIBILITY: APPROVED</p>
+                    <p class="prediction-confidence">Analysis Confidence: {result['approval_probability']}%</p>
+                    <div style="background: #10b981; color: white; padding: 10px 25px; border-radius: 50px; display: inline-block; font-weight: 700; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">
+                        ⚡ {result['risk_level']} Profile
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -967,11 +1095,11 @@ elif page == "🔮 Live Prediction":
             else:
                 st.markdown(f"""
                 <div class="prediction-rejected">
-                    <p style="font-size: 3rem; margin: 0;">❌</p>
-                    <p class="prediction-status">LOAN REJECTED</p>
-                    <p class="prediction-confidence">Rejection Probability: {result['rejection_probability']}%</p>
-                    <div class="risk-badge" style="background: rgba(255,255,255,0.2); color: white; margin-top: 15px;">
-                        {result['risk_level']}
+                    <p style="font-size: 3.5rem; margin: 0; filter: drop-shadow(0 0 10px rgba(244,63,94,0.3));">❌</p>
+                    <p class="prediction-status">ELIGIBILITY: REJECTED</p>
+                    <p class="prediction-confidence">Risk Assessment: {result['rejection_probability']}%</p>
+                    <div style="background: #f43f5e; color: white; padding: 10px 25px; border-radius: 50px; display: inline-block; font-weight: 700; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">
+                        ⚠️ {result['risk_level']} Profile
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1003,9 +1131,11 @@ elif page == "🔮 Live Prediction":
 # ============================================================
 elif page == "ℹ️ About":
     st.markdown("""
-    <div class="hero-container" style="padding: 30px 40px;">
-        <p class="hero-title" style="font-size: 2rem;">ℹ️ About This Project</p>
-        <p class="hero-subtitle">Technical details, methodology, and future roadmap</p>
+    <div class="hero-container" style="padding: 40px 60px;">
+        <div class="hero-content" style="padding: 25px 35px;">
+            <p class="hero-title" style="font-size: 2.2rem;">ℹ️ About <span>This Project</span></p>
+            <p class="hero-subtitle" style="font-size: 1.1rem; margin-top: 10px;">Technical details, methodology, and future roadmap</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -1075,8 +1205,12 @@ elif page == "ℹ️ About":
 # === FOOTER ===
 st.markdown("""
 <div class="footer">
-    <p>🏦 <strong>Loan Approval Prediction System</strong> — Powered by Machine Learning</p>
-    <p>Built by <a href="https://github.com/Kinshunk565" target="_blank">Kinshunk Garg</a> • 
-    <a href="https://github.com/Kinshunk565" target="_blank">GitHub</a></p>
+    <p style="font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; color: #064e3b;">🍃 EcoLoan Intel Dashboard</p>
+    <p>Premium Machine Learning for Sustainable Growth</p>
+    <p style="margin-top: 10px;">
+        Built with ✨ by <a href="https://github.com/Kinshunk565" target="_blank">Kinshunk Garg</a> • 
+        <a href="https://github.com/Kinshunk565" target="_blank">GitHub</a> • 
+        Live on <a href="https://render.com" target="_blank">Render</a>
+    </p>
 </div>
 """, unsafe_allow_html=True)
