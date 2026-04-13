@@ -6,5 +6,7 @@ seaborn
 streamlit
 plotly
 xgboost
+lightgbm
+catboost
 joblib
 Pillow

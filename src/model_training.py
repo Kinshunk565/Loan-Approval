@@ -43,7 +43,18 @@ try:
     HAS_XGBOOST = True
 except ImportError:
     HAS_XGBOOST = False
-    print("⚠️ XGBoost not installed. Using sklearn GradientBoosting as fallback.")
+
+try:
+    from lightgbm import LGBMClassifier
+    HAS_LGBM = True
+except ImportError:
+    HAS_LGBM = False
+
+try:
+    from catboost import CatBoostClassifier
+    HAS_CATBOOST = True
+except ImportError:
+    HAS_CATBOOST = False
 
 # Add parent to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -70,65 +81,49 @@ class ModelTrainer:
         """Define models and their hyperparameter grids."""
         models = {
             'Logistic Regression': {
-                'model': LogisticRegression(max_iter=1000, random_state=42),
+                'model': LogisticRegression(max_iter=2000, random_state=42),
                 'params': {
-                    'C': [0.01, 0.1, 1, 10],
-                    'penalty': ['l2'],
+                    'C': [0.1, 1, 10],
                     'solver': ['lbfgs', 'liblinear']
-                }
-            },
-            'Decision Tree': {
-                'model': DecisionTreeClassifier(random_state=42),
-                'params': {
-                    'max_depth': [3, 5, 7, 10, None],
-                    'min_samples_split': [2, 5, 10],
-                    'min_samples_leaf': [1, 2, 4],
-                    'criterion': ['gini', 'entropy']
                 }
             },
             'Random Forest': {
                 'model': RandomForestClassifier(random_state=42),
                 'params': {
-                    'n_estimators': [100, 200, 300],
-                    'max_depth': [5, 10, 15, None],
-                    'min_samples_split': [2, 5],
-                    'min_samples_leaf': [1, 2],
-                    'max_features': ['sqrt', 'log2']
-                }
-            },
-            'SVM': {
-                'model': SVC(probability=True, random_state=42),
-                'params': {
-                    'C': [0.1, 1, 10],
-                    'kernel': ['rbf', 'linear'],
-                    'gamma': ['scale', 'auto']
+                    'n_estimators': [100, 200],
+                    'max_depth': [10, 20, None],
+                    'min_samples_leaf': [1, 2]
                 }
             }
         }
         
         if HAS_XGBOOST:
             models['XGBoost'] = {
-                'model': XGBClassifier(
-                    random_state=42,
-                    eval_metric='logloss',
-                    use_label_encoder=False
-                ),
+                'model': XGBClassifier(random_state=42, eval_metric='logloss'),
                 'params': {
-                    'n_estimators': [100, 200, 300],
-                    'max_depth': [3, 5, 7],
-                    'learning_rate': [0.01, 0.1, 0.2],
-                    'subsample': [0.8, 1.0],
-                    'colsample_bytree': [0.8, 1.0]
+                    'n_estimators': [100, 200],
+                    'learning_rate': [0.05, 0.1],
+                    'max_depth': [3, 5, 7]
                 }
             }
-        else:
-            models['Gradient Boosting'] = {
-                'model': GradientBoostingClassifier(random_state=42),
+            
+        if HAS_LGBM:
+            models['LightGBM'] = {
+                'model': LGBMClassifier(random_state=42, verbose=-1),
                 'params': {
-                    'n_estimators': [100, 200, 300],
-                    'max_depth': [3, 5, 7],
-                    'learning_rate': [0.01, 0.1, 0.2],
-                    'subsample': [0.8, 1.0]
+                    'n_estimators': [100, 200],
+                    'learning_rate': [0.05, 0.1],
+                    'num_leaves': [31, 50]
+                }
+            }
+            
+        if HAS_CATBOOST:
+            models['CatBoost'] = {
+                'model': CatBoostClassifier(random_state=42, silent=True),
+                'params': {
+                    'iterations': [100, 200],
+                    'depth': [4, 6],
+                    'learning_rate': [0.05, 0.1]
                 }
             }
         
@@ -139,8 +134,13 @@ class ModelTrainer:
         models = self.define_models()
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
         
+    def train_all(self, X_train, X_test, y_train, y_test):
+        """Train all models with GridSearchCV and evaluate."""
+        models = self.define_models()
+        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+        
         print("=" * 70)
-        print("🚀 LOAN APPROVAL PREDICTION — MODEL TRAINING PIPELINE")
+        print("LOAN APPROVAL PREDICTION — MODEL TRAINING PIPELINE")
         print("=" * 70)
         print(f"   Training samples: {len(X_train)}")
         print(f"   Testing samples:  {len(X_test)}")
@@ -151,9 +151,9 @@ class ModelTrainer:
         best_auc = 0
         
         for name, config in models.items():
-            print(f"\n{'─' * 50}")
-            print(f"🔄 Training: {name}")
-            print(f"{'─' * 50}")
+            print(f"\n{'-' * 50}")
+            print(f"Training: {name}")
+            print(f"{'-' * 50}")
             
             start_time = time.time()
             
@@ -209,11 +209,10 @@ class ModelTrainer:
                 }
             }
             
-            print(f"   ✅ Accuracy:  {accuracy:.4f}")
-            print(f"   📊 AUC-ROC:   {auc:.4f}")
-            print(f"   🎯 F1-Score:  {f1:.4f}")
-            print(f"   ⏱️  Time:     {train_time:.2f}s")
-            print(f"   🔧 Best Params: {grid.best_params_}")
+            print(f"   Accuracy:  {accuracy:.4f}")
+            print(f"   AUC-ROC:   {auc:.4f}")
+            print(f"   F1-Score:  {f1:.4f}")
+            print(f"   Time:     {train_time:.2f}s")
             
             # Track best model
             if auc > best_auc:
@@ -221,8 +220,45 @@ class ModelTrainer:
                 self.best_model_name = name
                 self.best_model = best_estimator
         
+        # --- ENSEMBLE: VOTING CLASSIFIER ---
+        print("\nCreating Ensemble (Voting Classifier)...")
+        from sklearn.ensemble import VotingClassifier
+        
+        # Select top 3 models for voting
+        sorted_models_list = sorted(self.results.items(), key=lambda x: x[1]['auc_roc'], reverse=True)
+        top_model_names = [m[0] for m in sorted_models_list[:3]]
+        
+        estimators = [(name, self.models[name]) for name in top_model_names]
+        voting_clf = VotingClassifier(estimators=estimators, voting='soft')
+        voting_clf.fit(X_train, y_train)
+        
+        # Evaluate Voting Classifier
+        y_pred_v = voting_clf.predict(X_test)
+        y_prob_v = voting_clf.predict_proba(X_test)[:, 1]
+        auc_v = roc_auc_score(y_test, y_prob_v)
+        
+        self.models['Voting Ensemble'] = voting_clf
+        self.results['Voting Ensemble'] = {
+            'accuracy': round(float(accuracy_score(y_test, y_pred_v)), 4),
+            'precision': round(float(precision_score(y_test, y_pred_v, zero_division=0)), 4),
+            'recall': round(float(recall_score(y_test, y_pred_v, zero_division=0)), 4),
+            'f1_score': round(float(f1_score(y_test, y_pred_v, zero_division=0)), 4),
+            'auc_roc': round(float(auc_v), 4),
+            'cv_mean': 0, # Not computed for ensemble here
+            'cv_std': 0,
+            'confusion_matrix': confusion_matrix(y_test, y_pred_v).tolist(),
+            'best_params': "Ensemble of " + ", ".join(top_model_names),
+            'train_time_seconds': 0,
+            'roc_curve': {'fpr': [], 'tpr': []} 
+        }
+        
+        if auc_v > best_auc:
+            self.best_model_name = 'Voting Ensemble'
+            self.best_model = voting_clf
+            print(f"⭐ Voting Ensemble is now the best model! (AUC: {auc_v:.4f})")
+        
         print(f"\n{'=' * 70}")
-        print(f"🏆 BEST MODEL: {self.best_model_name} (AUC: {best_auc:.4f})")
+        print(f"FINAL BEST MODEL: {self.best_model_name} (AUC: {max(best_auc, auc_v):.4f})")
         print(f"{'=' * 70}")
     
     def get_feature_importance(self, feature_names: list) -> dict:
@@ -249,19 +285,19 @@ class ModelTrainer:
         # Save best model
         model_path = os.path.join(self.models_dir, "best_model.joblib")
         joblib.dump(self.best_model, model_path)
-        print(f"✅ Best model saved: {model_path}")
+        print(f"Best model saved: {model_path}")
         
         # Save all models
         all_models_path = os.path.join(self.models_dir, "all_models.joblib")
         joblib.dump(self.models, all_models_path)
-        print(f"✅ All models saved: {all_models_path}")
+        print(f"All models saved: {all_models_path}")
         
         # Feature importance
         importance = self.get_feature_importance(feature_names)
         importance_path = os.path.join(self.models_dir, "feature_importance.json")
         with open(importance_path, 'w') as f:
             json.dump(importance, f, indent=2)
-        print(f"✅ Feature importance saved: {importance_path}")
+        print(f"Feature importance saved: {importance_path}")
         
         # Model metrics
         metrics = {
@@ -271,7 +307,7 @@ class ModelTrainer:
         metrics_path = os.path.join(self.models_dir, "model_metrics.json")
         with open(metrics_path, 'w') as f:
             json.dump(metrics, f, indent=2)
-        print(f"✅ Metrics saved: {metrics_path}")
+        print(f"Metrics saved: {metrics_path}")
         
         return importance
     
@@ -357,7 +393,7 @@ class ModelTrainer:
             plt.savefig(os.path.join(assets_dir, 'feature_importance.png'), dpi=150, bbox_inches='tight')
             plt.close()
         
-        print(f"✅ Plots saved to: {assets_dir}")
+        print(f"Plots saved to: {assets_dir}")
 
 
 def main():
@@ -376,7 +412,7 @@ def main():
         print(f"✅ Dataset generated: {data_path}")
     
     # Preprocess
-    print("\n🔄 Preprocessing data...")
+    print("\nPreprocessing data...")
     preprocessor = LoanDataPreprocessor()
     X_train, X_test, y_train, y_test, raw_df = preprocessor.prepare_train_test(data_path)
     
@@ -389,7 +425,7 @@ def main():
     eda_path = os.path.join(models_dir, "eda_stats.json")
     with open(eda_path, 'w') as f:
         json.dump(eda_stats, f, indent=2, default=str)
-    print(f"✅ EDA stats saved: {eda_path}")
+    print(f"EDA stats saved: {eda_path}")
     
     # Train models
     trainer = ModelTrainer(models_dir)
@@ -400,16 +436,16 @@ def main():
     importance = trainer.save_results(feature_names)
     
     # Generate plots
-    print("\n📊 Generating evaluation plots...")
+    print("\nGenerating evaluation plots...")
     trainer.generate_plots(X_test, y_test, feature_names)
     
     print("\n" + "=" * 70)
-    print("🎉 TRAINING PIPELINE COMPLETE!")
+    print("TRAINING PIPELINE COMPLETE!")
     print("=" * 70)
-    print(f"\n📁 Model artifacts saved in: {models_dir}")
-    print(f"🏆 Best Model: {trainer.best_model_name}")
-    print(f"📊 Best AUC-ROC: {trainer.results[trainer.best_model_name]['auc_roc']:.4f}")
-    print(f"\n💡 Run the dashboard: streamlit run streamlit_app.py")
+    print(f"\nModel artifacts saved in: {models_dir}")
+    print(f"Best Model: {trainer.best_model_name}")
+    print(f"Best AUC-ROC: {trainer.results[trainer.best_model_name]['auc_roc']:.4f}")
+    print(f"\nRun the dashboard: streamlit run streamlit_app.py")
 
 
 if __name__ == "__main__":

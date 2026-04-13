@@ -55,16 +55,7 @@ class LoanPredictor:
     
     def predict(self, applicant_data: dict) -> dict:
         """
-        Make a prediction for a single applicant.
-        
-        Args:
-            applicant_data: Dictionary with keys:
-                - Gender, Married, Dependents, Education, Self_Employed
-                - ApplicantIncome, CoapplicantIncome, LoanAmount
-                - Loan_Amount_Term, Credit_History, Property_Area
-        
-        Returns:
-            Dictionary with prediction, probability, risk assessment, and factors
+        Make a prediction for a single applicant with deep reasoning.
         """
         if self.model is None or self.preprocessor is None:
             raise RuntimeError("Model or preprocessor not loaded. Run training first.")
@@ -99,6 +90,9 @@ class LoanPredictor:
         # Contributing factors
         factors = self._get_contributing_factors(applicant_data)
         
+        # Actionable recommendations (important for rejection)
+        recommendations = self.get_actionable_recommendations(applicant_data, approval_prob)
+        
         return {
             'approved': bool(prediction == 1),
             'approval_probability': round(approval_prob * 100, 2),
@@ -106,6 +100,7 @@ class LoanPredictor:
             'risk_level': risk_level,
             'risk_color': risk_color,
             'contributing_factors': factors,
+            'recommendations': recommendations,
             'model_used': self.model_metrics.get('best_model', 'Unknown') if self.model_metrics else 'Unknown'
         }
     
@@ -119,75 +114,82 @@ class LoanPredictor:
             factors.append({
                 'factor': 'Credit History',
                 'impact': 'positive',
-                'detail': 'Good credit history significantly increases approval chances'
+                'detail': 'Your clean credit record is a major strength.'
             })
         else:
             factors.append({
                 'factor': 'Credit History',
                 'impact': 'negative',
-                'detail': 'No/bad credit history is the #1 reason for rejection'
+                'detail': 'Missing or poor credit history is negatively impacting your score.'
             })
         
         # Income vs Loan
         income = data.get('ApplicantIncome', 0) + data.get('CoapplicantIncome', 0)
-        loan = data.get('LoanAmount', 1) * 1000
-        ratio = income / max(loan, 1)
+        loan = data.get('LoanAmount', 1) 
+        ratio = (loan * 1000) / max(income, 1)
         
-        if ratio > 0.5:
+        if ratio < 20: # Loan is less than 20x monthly income
             factors.append({
-                'factor': 'Income-to-Loan Ratio',
+                'factor': 'Loan-to-Income Ratio',
                 'impact': 'positive',
-                'detail': f'Strong ratio ({ratio:.2f}x) — income well covers the loan'
+                'detail': f'Your requested loan amount is moderate compared to your income.'
             })
-        elif ratio > 0.2:
+        elif ratio < 50:
             factors.append({
-                'factor': 'Income-to-Loan Ratio',
+                'factor': 'Loan-to-Income Ratio',
                 'impact': 'neutral',
-                'detail': f'Moderate ratio ({ratio:.2f}x) — borderline coverage'
+                'detail': f'Your requested loan amount is significant relative to income.'
             })
         else:
             factors.append({
-                'factor': 'Income-to-Loan Ratio',
+                'factor': 'Loan-to-Income Ratio',
                 'impact': 'negative',
-                'detail': f'Low ratio ({ratio:.2f}x) — income may not cover the loan'
+                'detail': f'Requested loan is very high ({ratio:.1f}x) relative to income.'
             })
         
-        # Education
-        if data.get('Education', '') == 'Graduate':
+        # Stability
+        is_grad = data.get('Education', '') == 'Graduate'
+        is_employed = data.get('Self_Employed', '') == 'No'
+        if is_grad and is_employed:
             factors.append({
-                'factor': 'Education',
+                'factor': 'Employment Stability',
                 'impact': 'positive',
-                'detail': 'Graduate education indicates stable earning potential'
-            })
-        else:
-            factors.append({
-                'factor': 'Education',
-                'impact': 'neutral',
-                'detail': 'Non-graduate status has minor impact'
-            })
-        
-        # Property Area
-        area = data.get('Property_Area', '')
-        if area == 'Semiurban':
-            factors.append({
-                'factor': 'Property Area',
-                'impact': 'positive',
-                'detail': 'Semiurban properties show higher approval rates'
-            })
-        elif area == 'Urban':
-            factors.append({
-                'factor': 'Property Area',
-                'impact': 'neutral',
-                'detail': 'Urban area — average approval rate'
-            })
-        else:
-            factors.append({
-                'factor': 'Property Area',
-                'impact': 'neutral',
-                'detail': 'Rural area — slightly lower approval probability'
+                'detail': 'Being a graduate with salaried employment indicates high stability.'
             })
         
         return factors
+
+    def get_actionable_recommendations(self, data: dict, prob: float) -> list:
+        """Generate specific advice to improve approval odds."""
+        recommendations = []
+        
+        if prob >= 0.8:
+            recommendations.append("Your profile is strong. Ensure all documents are ready for fast processing.")
+            return recommendations
+
+        # 1. Credit History is the big one
+        if data.get('Credit_History', 0) == 0:
+            recommendations.append("Build your credit score by taking a small credit card or secured loan and paying on time.")
+        
+        # 2. Income/Loan ratio
+        income = data.get('ApplicantIncome', 0) + data.get('CoapplicantIncome', 0)
+        loan = data.get('LoanAmount', 1)
+        if (loan * 1000) / max(income, 1) > 40:
+            recommendations.append(f"Consider reducing your loan request to below ${int(income * 40 / 1000)} to improve approval odds.")
+            recommendations.append("Adding a co-applicant with independent income could significantly boost your capacity.")
+            
+        # 3. Employment
+        if data.get('Self_Employed', '') == 'Yes':
+            recommendations.append("Prepare 3 years of audited tax returns to prove income stability as a self-employed individual.")
+            
+        # 4. Property Area
+        if data.get('Property_Area', '') == 'Rural':
+             recommendations.append("Banks sometimes have stricter LTV ratios for rural areas; consider a higher down payment.")
+
+        if not recommendations:
+            recommendations.append("Maintain your current financial status and re-apply in 6 months for a better assessment.")
+            
+        return recommendations
     
     def get_model_summary(self) -> dict:
         """Get a summary of the trained model for display."""
@@ -211,29 +213,5 @@ class LoanPredictor:
 
 if __name__ == "__main__":
     predictor = LoanPredictor()
-    
-    # Test prediction
-    test_applicant = {
-        'Gender': 'Male',
-        'Married': 'Yes',
-        'Dependents': '1',
-        'Education': 'Graduate',
-        'Self_Employed': 'No',
-        'ApplicantIncome': 6000,
-        'CoapplicantIncome': 2000,
-        'LoanAmount': 150,
-        'Loan_Amount_Term': 360.0,
-        'Credit_History': 1.0,
-        'Property_Area': 'Semiurban'
-    }
-    
-    result = predictor.predict(test_applicant)
-    print("\n🔮 PREDICTION RESULT:")
-    print(f"   Status: {'✅ APPROVED' if result['approved'] else '❌ REJECTED'}")
-    print(f"   Confidence: {result['approval_probability']}%")
-    print(f"   Risk Level: {result['risk_level']}")
-    print(f"   Model Used: {result['model_used']}")
-    print(f"\n   Contributing Factors:")
-    for f in result['contributing_factors']:
-        icon = "🟢" if f['impact'] == 'positive' else ("🔴" if f['impact'] == 'negative' else "🟡")
-        print(f"     {icon} {f['factor']}: {f['detail']}")
+    # Test would go here, removed emoji prints
+    print("Predictor module ready.")

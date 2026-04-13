@@ -1,21 +1,21 @@
 {
   "shape": [
-    5000,
+    20000,
     13
   ],
-  "approval_rate": 0.6296,
+  "approval_rate": 0.32695,
   "missing_values": {
     "Loan_ID": 0,
-    "Gender": 87,
-    "Married": 30,
-    "Dependents": 130,
+    "Gender": 387,
+    "Married": 99,
+    "Dependents": 480,
     "Education": 0,
-    "Self_Employed": 266,
+    "Self_Employed": 1015,
     "ApplicantIncome": 0,
     "CoapplicantIncome": 0,
-    "LoanAmount": 179,
-    "Loan_Amount_Term": 100,
-    "Credit_History": 397,
+    "LoanAmount": 716,
+    "Loan_Amount_Term": 387,
+    "Credit_History": 1545,
     "Property_Area": 0,
     "Loan_Status": 0
   },
@@ -36,68 +36,68 @@
   },
   "numerical_stats": {
     "ApplicantIncome": {
-      "mean": 5049.7058,
-      "median": 4007.5,
-      "std": 3841.6885567468594,
-      "min": 1000.0,
-      "max": 50410.0
+      "mean": 5343.055,
+      "median": 4450.5,
+      "std": 3534.7608239142737,
+      "min": 1200.0,
+      "max": 44261.0
     },
     "CoapplicantIncome": {
-      "mean": 1128.3676,
+      "mean": 1530.7251,
       "median": 0.0,
-      "std": 2043.5945556327463,
+      "std": 2309.1703387607986,
       "min": 0.0,
-      "max": 26467.0
+      "max": 29811.0
     },
     "LoanAmount": {
-      "mean": 288.91184401576436,
-      "median": 237.0,
-      "std": 191.09724748029458,
-      "min": 20.0,
-      "max": 700.0
+      "mean": 410.572910184609,
+      "median": 362.0,
+      "std": 244.33865671966737,
+      "min": 19.0,
+      "max": 800.0
     },
     "Loan_Amount_Term": {
-      "mean": 316.56979591836733,
+      "mean": 314.84994646407995,
       "median": 360.0,
-      "std": 98.14615693965848,
+      "std": 99.25169627961621,
       "min": 12.0,
       "max": 480.0
     },
     "Credit_History": {
-      "mean": 0.8574842494025635,
+      "mean": 0.7972365212679491,
       "median": 1.0,
-      "std": 0.3496163128207403,
+      "std": 0.4020686633741144,
       "min": 0.0,
       "max": 1.0
     }
   },
   "categorical_stats": {
     "Gender": {
-      "Male": 3927,
-      "Female": 986
+      "Male": 14722,
+      "Female": 4891
     },
     "Married": {
-      "Yes": 3324,
-      "No": 1646
+      "Yes": 11922,
+      "No": 7979
     },
     "Dependents": {
-      "0": 2687,
-      "2": 847,
-      "1": 795,
-      "3+": 541
+      "0": 9768,
+      "1": 3498,
+      "2": 3498,
+      "3+": 2756
     },
     "Education": {
-      "Graduate": 3899,
-      "Not Graduate": 1101
+      "Graduate": 15005,
+      "Not Graduate": 4995
     },
     "Self_Employed": {
-      "No": 4093,
-      "Yes": 641
+      "No": 16055,
+      "Yes": 2930
     },
     "Property_Area": {
-      "Semiurban": 1914,
-      "Urban": 1643,
-      "Rural": 1443
+      "Semiurban": 8042,
+      "Urban": 6620,
+      "Rural": 5338
     }
   }
 }

@@ -17,128 +17,112 @@ import pandas as pd
 import numpy as np
 import os
 
-def generate_loan_dataset(n_samples: int = 5000, seed: int = 42) -> pd.DataFrame:
-    """Generate a realistic synthetic loan dataset."""
+def generate_loan_dataset(n_samples: int = 20000, seed: int = 42) -> pd.DataFrame:
+    """Generate a realistic synthetic loan dataset with 20k samples."""
     np.random.seed(seed)
     
     # --- Loan IDs ---
-    loan_ids = [f"LP{str(i).zfill(5)}" for i in range(1, n_samples + 1)]
+    loan_ids = [f"LP{str(i).zfill(6)}" for i in range(1, n_samples + 1)]
     
-    # --- Gender (80% Male, 20% Female — mirrors real dataset) ---
+    # --- Gender (75% Male, 25% Female) ---
     gender = np.random.choice(
-        ['Male', 'Female'], n_samples, p=[0.80, 0.20]
+        ['Male', 'Female'], n_samples, p=[0.75, 0.25]
     )
     
-    # --- Married (65% Yes, 35% No) ---
+    # --- Married (60% Yes, 40% No) ---
     married = np.random.choice(
-        ['Yes', 'No'], n_samples, p=[0.65, 0.35]
+        ['Yes', 'No'], n_samples, p=[0.60, 0.40]
     )
     
-    # --- Dependents (0: 55%, 1: 17%, 2: 17%, 3+: 11%) ---
+    # --- Dependents (0: 50%, 1: 18%, 2: 18%, 3+: 14%) ---
     dependents = np.random.choice(
-        ['0', '1', '2', '3+'], n_samples, p=[0.55, 0.17, 0.17, 0.11]
+        ['0', '1', '2', '3+'], n_samples, p=[0.50, 0.18, 0.18, 0.14]
     )
     
-    # --- Education (78% Graduate, 22% Not Graduate) ---
+    # --- Education (75% Graduate, 25% Not Graduate) ---
     education = np.random.choice(
-        ['Graduate', 'Not Graduate'], n_samples, p=[0.78, 0.22]
+        ['Graduate', 'Not Graduate'], n_samples, p=[0.75, 0.25]
     )
     
-    # --- Self Employed (14% Yes, 86% No) ---
+    # --- Self Employed (15% Yes, 85% No) ---
     self_employed = np.random.choice(
-        ['Yes', 'No'], n_samples, p=[0.14, 0.86]
+        ['Yes', 'No'], n_samples, p=[0.15, 0.85]
     )
     
-    # --- Applicant Income (log-normal distribution, realistic range) ---
+    # --- Applicant Income (improved distribution) ---
     applicant_income = np.random.lognormal(
-        mean=8.3, sigma=0.7, size=n_samples
+        mean=8.4, sigma=0.6, size=n_samples
     ).astype(int)
-    applicant_income = np.clip(applicant_income, 1000, 80000)
+    applicant_income = np.clip(applicant_income, 1200, 100000)
     
-    # --- Coapplicant Income (many zeros, some with income) ---
-    has_coapplicant = np.random.choice([True, False], n_samples, p=[0.45, 0.55])
+    # --- Coapplicant Income ---
+    has_coapplicant = np.random.choice([True, False], n_samples, p=[0.50, 0.50])
     coapplicant_income = np.where(
         has_coapplicant,
-        np.random.lognormal(mean=7.5, sigma=0.8, size=n_samples).astype(int),
+        np.random.lognormal(mean=7.8, sigma=0.7, size=n_samples).astype(int),
         0
     )
-    coapplicant_income = np.clip(coapplicant_income, 0, 40000)
+    coapplicant_income = np.clip(coapplicant_income, 0, 50000)
     
-    # --- Loan Amount (correlated with income, log-normal) ---
-    base_loan = (applicant_income + coapplicant_income) * np.random.uniform(0.02, 0.08, n_samples)
-    loan_amount = np.clip(base_loan, 9, 700).astype(int)
+    # --- Loan Amount (correlated with total income) ---
+    total_inc = applicant_income + coapplicant_income
+    base_loan = total_inc * np.random.uniform(0.015, 0.12, n_samples)
+    loan_amount = np.clip(base_loan, 10, 800).astype(int)
     
-    # --- Loan Amount Term (mostly 360 months) ---
+    # --- Loan Amount Term ---
     loan_amount_term = np.random.choice(
         [12, 36, 60, 84, 120, 180, 240, 300, 360, 480],
         n_samples,
         p=[0.01, 0.02, 0.02, 0.03, 0.03, 0.04, 0.04, 0.06, 0.72, 0.03]
     ).astype(float)
     
-    # --- Credit History (85% have good history = 1.0) ---
+    # --- Credit History (80% have good history) ---
     credit_history = np.random.choice(
-        [1.0, 0.0], n_samples, p=[0.85, 0.15]
+        [1.0, 0.0], n_samples, p=[0.80, 0.20]
     )
     
     # --- Property Area ---
     property_area = np.random.choice(
-        ['Urban', 'Semiurban', 'Rural'], n_samples, p=[0.33, 0.38, 0.29]
+        ['Urban', 'Semiurban', 'Rural'], n_samples, p=[0.33, 0.40, 0.27]
     )
     
-    # --- Loan Status (Target — based on realistic scoring logic) ---
+    # --- Loan Status Logic (More complex) ---
     loan_status = []
     for i in range(n_samples):
         score = 0.0
         
-        # Credit history is the strongest predictor
+        # Credit history is critical
         if credit_history[i] == 1.0:
-            score += 40
+            score += 45
         else:
-            score -= 25
+            score -= 35
         
-        # Income to loan ratio
-        total_income = applicant_income[i] + coapplicant_income[i]
-        if loan_amount[i] > 0:
-            ratio = total_income / (loan_amount[i] * 1000)
-            if ratio > 0.5:
-                score += 20
-            elif ratio > 0.3:
-                score += 10
-            elif ratio > 0.15:
-                score += 5
-            else:
-                score -= 10
+        # Income to Loan Ratio (PTI - Payment to Income proxy)
+        t_income = total_inc[i]
+        l_amount = loan_amount[i]
+        if l_amount > 0:
+            ratio = t_income / (l_amount * 1000) # Basic ratio
+            if ratio > 0.6: score += 25
+            elif ratio > 0.4: score += 15
+            elif ratio > 0.2: score += 5
+            else: score -= 20
         
-        # Education
-        if education[i] == 'Graduate':
-            score += 8
+        # Education and Stability
+        if education[i] == 'Graduate': score += 10
+        if married[i] == 'Yes' and gender[i] == 'Female': score += 5 # Higher stability statistical bias
         
-        # Property area (semiurban has higher approval)
-        if property_area[i] == 'Semiurban':
-            score += 7
-        elif property_area[i] == 'Urban':
-            score += 3
+        # Property area
+        if property_area[i] == 'Semiurban': score += 8
+        elif property_area[i] == 'Urban': score += 4
         
-        # Marriage status
-        if married[i] == 'Yes':
-            score += 4
+        # Dependents penalty for high loan amounts
+        if l_amount > 300 and dependents[i] in ['2', '3+']:
+            score -= 10
+            
+        # Add noise
+        score += np.random.normal(0, 15)
         
-        # Self employed (slight negative)
-        if self_employed[i] == 'Yes':
-            score -= 3
-        
-        # Dependents
-        dep = dependents[i]
-        if dep == '0':
-            score += 3
-        elif dep in ['2', '3+']:
-            score -= 3
-        
-        # Add randomness for realism
-        score += np.random.normal(0, 12)
-        
-        # Decision threshold
-        loan_status.append('Y' if score >= 35 else 'N')
+        loan_status.append('Y' if score >= 40 else 'N')
     
     # --- Build DataFrame ---
     df = pd.DataFrame({
@@ -190,17 +174,17 @@ def generate_loan_dataset(n_samples: int = 5000, seed: int = 42) -> pd.DataFrame
 
 
 if __name__ == "__main__":
-    print("🔄 Generating realistic loan dataset...")
-    df = generate_loan_dataset(5000)
+    print("Generating realistic loan dataset...")
+    df = generate_loan_dataset(20000)
     
     output_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "loan_data.csv")
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_csv(output_path, index=False)
     
-    print(f"✅ Dataset saved to: {output_path}")
-    print(f"   Shape: {df.shape}")
-    print(f"   Approval Rate: {(df['Loan_Status'] == 'Y').mean():.1%}")
-    print(f"\n📊 Missing Values:")
+    print(f"Dataset saved to: {output_path}")
+    print(f"Shape: {df.shape}")
+    print(f"Approval Rate: {(df['Loan_Status'] == 'Y').mean():.1%}")
+    print("\nMissing Values:")
     print(df.isnull().sum()[df.isnull().sum() > 0])
-    print(f"\n📋 Sample Data:")
+    print("\nSample Data:")
     print(df.head())

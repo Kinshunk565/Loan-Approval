@@ -85,7 +85,7 @@ class LoanDataPreprocessor:
         return df
     
     def engineer_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Create new features from existing ones."""
+        """Create more complex features for advanced ML prediction."""
         df = df.copy()
         
         # Total Income
@@ -97,16 +97,27 @@ class LoanDataPreprocessor:
         df['LogLoanAmount'] = np.log1p(df['LoanAmount'])
         
         # EMI (Equated Monthly Installment)
-        df['EMI'] = df['LoanAmount'] / df['Loan_Amount_Term']
+        df['EMI'] = df['LoanAmount'] / (df['Loan_Amount_Term'] + 1)
         
         # Balance Income (income left after EMI)
         df['BalanceIncome'] = df['TotalIncome'] - (df['EMI'] * 1000)
         
         # Income to Loan Ratio
-        df['IncomeToLoanRatio'] = df['TotalIncome'] / (df['LoanAmount'] + 1)
+        df['IncomeToLoanRatio'] = df['TotalIncome'] / (df['LoanAmount'] + 0.01)
         
-        # Loan Amount to Income Percentage
-        df['LoanIncomePercent'] = (df['LoanAmount'] * 1000) / (df['TotalIncome'] + 1) * 100
+        # 1. Debt-to-Income Ratio (Proxy)
+        df['DebtToIncomeRatio'] = (df['LoanAmount'] * 1000) / (df['TotalIncome'] + 1)
+        
+        # 2. Stability Score (Education + Married + Employment)
+        # We need numeric values for these to create interaction features
+        df['StabilityScore'] = (
+            (df['Education'] == 'Graduate').astype(int) * 2 + 
+            (df['Married'] == 'Yes').astype(int) * 1 +
+            (df['Self_Employed'] == 'No').astype(int) * 1 # Regular employment seen as more "stable" by banks
+        )
+        
+        # 3. Credit Stress Interaction
+        df['CreditStress'] = df['LoanAmount'] * (1 - df['Credit_History'].fillna(0))
         
         return df
     
@@ -252,7 +263,7 @@ class LoanDataPreprocessor:
             'numerical_columns': self.numerical_columns,
             'is_fitted': self.is_fitted
         }, filepath)
-        print(f"✅ Preprocessor saved to: {filepath}")
+        print(f"Preprocessor saved to: {filepath}")
     
     def load(self, filepath: str):
         """Load a fitted preprocessor."""
@@ -263,7 +274,7 @@ class LoanDataPreprocessor:
         self.categorical_columns = data['categorical_columns']
         self.numerical_columns = data['numerical_columns']
         self.is_fitted = data['is_fitted']
-        print(f"✅ Preprocessor loaded from: {filepath}")
+        print(f"Preprocessor loaded from: {filepath}")
 
 
 if __name__ == "__main__":
