@@ -1,21 +1,28 @@
 {
   "shape": [
     20000,
-    13
+    20
   ],
-  "approval_rate": 0.32695,
+  "approval_rate": 0.5405,
   "missing_values": {
     "Loan_ID": 0,
-    "Gender": 387,
-    "Married": 99,
-    "Dependents": 480,
+    "Gender": 405,
+    "Married": 100,
+    "Dependents": 508,
     "Education": 0,
-    "Self_Employed": 1015,
+    "Self_Employed": 1046,
     "ApplicantIncome": 0,
     "CoapplicantIncome": 0,
-    "LoanAmount": 716,
-    "Loan_Amount_Term": 387,
-    "Credit_History": 1545,
+    "LoanAmount": 695,
+    "Loan_Amount_Term": 379,
+    "Credit_Score": 771,
+    "Credit_Utilization": 625,
+    "Open_Accounts": 387,
+    "Prev_Loan_Count": 594,
+    "Prev_Loans_Repaid": 592,
+    "Prev_Loan_Defaults": 661,
+    "Avg_Prev_Loan_Amount": 786,
+    "Repayment_Rate": 573,
     "Property_Area": 0,
     "Loan_Status": 0
   },
@@ -30,7 +37,14 @@
     "CoapplicantIncome": "int64",
     "LoanAmount": "float64",
     "Loan_Amount_Term": "float64",
-    "Credit_History": "float64",
+    "Credit_Score": "float64",
+    "Credit_Utilization": "float64",
+    "Open_Accounts": "float64",
+    "Prev_Loan_Count": "float64",
+    "Prev_Loans_Repaid": "float64",
+    "Prev_Loan_Defaults": "float64",
+    "Avg_Prev_Loan_Amount": "float64",
+    "Repayment_Rate": "float64",
     "Property_Area": "str",
     "Loan_Status": "str"
   },
@@ -50,54 +64,103 @@
       "max": 29811.0
     },
     "LoanAmount": {
-      "mean": 410.572910184609,
+      "mean": 410.56078736078734,
       "median": 362.0,
-      "std": 244.33865671966737,
+      "std": 244.3209483523116,
       "min": 19.0,
       "max": 800.0
     },
     "Loan_Amount_Term": {
-      "mean": 314.84994646407995,
+      "mean": 314.9833341827634,
       "median": 360.0,
-      "std": 99.25169627961621,
+      "std": 99.04821454627633,
       "min": 12.0,
       "max": 480.0
     },
-    "Credit_History": {
-      "mean": 0.7972365212679491,
+    "Credit_Score": {
+      "mean": 702.7799677570337,
+      "median": 704.0,
+      "std": 79.3787225370587,
+      "min": 351.0,
+      "max": 850.0
+    },
+    "Credit_Utilization": {
+      "mean": 31.574049032258067,
+      "median": 29.8,
+      "std": 16.541718786247518,
+      "min": 0.3,
+      "max": 100.0
+    },
+    "Open_Accounts": {
+      "mean": 4.002039463621068,
+      "median": 4.0,
+      "std": 2.004201155865424,
+      "min": 0.0,
+      "max": 14.0
+    },
+    "Prev_Loan_Count": {
+      "mean": 2.129959806245491,
+      "median": 2.0,
+      "std": 1.9367510038322133,
+      "min": 0.0,
+      "max": 8.0
+    },
+    "Prev_Loans_Repaid": {
+      "mean": 1.7050700741962077,
       "median": 1.0,
-      "std": 0.4020686633741144,
+      "std": 1.6254630774470435,
+      "min": 0.0,
+      "max": 8.0
+    },
+    "Prev_Loan_Defaults": {
+      "mean": 0.42328972542530635,
+      "median": 0.0,
+      "std": 0.7531418079463116,
+      "min": 0.0,
+      "max": 7.0
+    },
+    "Avg_Prev_Loan_Amount": {
+      "mean": 200.92764650775476,
+      "median": 166.2,
+      "std": 176.0936458867768,
+      "min": 0.0,
+      "max": 500.0
+    },
+    "Repayment_Rate": {
+      "mean": 0.6191866989241777,
+      "median": 0.75,
+      "std": 0.41859229251526664,
       "min": 0.0,
       "max": 1.0
     }
   },
   "categorical_stats": {
     "Gender": {
-      "Male": 14722,
-      "Female": 4891
+      "Male": 14702,
+      "Female": 4893
     },
     "Married": {
-      "Yes": 11922,
-      "No": 7979
+      "Yes": 11914,
+      "No": 7986
     },
     "Dependents": {
-      "0": 9768,
-      "1": 3498,
-      "2": 3498,
-      "3+": 2756
+      "0": 9749,
+      "2": 3506,
+      "1": 3483,
+      "3+": 2754
     },
     "Education": {
       "Graduate": 15005,
       "Not Graduate": 4995
     },
     "Self_Employed": {
-      "No": 16055,
-      "Yes": 2930
+      "No": 16045,
+      "Yes": 2909
     },
     "Property_Area": {
-      "Semiurban": 8042,
-      "Urban": 6620,
-      "Rural": 5338
+      "Semiurban": 7997,
+      "Urban": 6582,
+      "Rural": 5421
     }
   }
 }

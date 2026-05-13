@@ -4,6 +4,9 @@ Loan Approval Prediction — Data Preprocessing Pipeline
 Handles all data cleaning, feature engineering, encoding,
 and scaling. Returns train/test splits ready for model training.
 
+Features enhanced credit scoring with FICO Score, Credit Utilization,
+Open Accounts, and Past Loan History for granular risk assessment.
+
 Author: Kinshunk Garg
 """
 
@@ -29,7 +32,9 @@ class LoanDataPreprocessor:
         ]
         self.numerical_columns = [
             'ApplicantIncome', 'CoapplicantIncome', 'LoanAmount',
-            'Loan_Amount_Term', 'Credit_History'
+            'Loan_Amount_Term', 'Credit_Score', 'Credit_Utilization',
+            'Open_Accounts', 'Prev_Loan_Count', 'Prev_Loans_Repaid',
+            'Prev_Loan_Defaults', 'Avg_Prev_Loan_Amount', 'Repayment_Rate'
         ]
         self.is_fitted = False
     
@@ -109,15 +114,75 @@ class LoanDataPreprocessor:
         df['DebtToIncomeRatio'] = (df['LoanAmount'] * 1000) / (df['TotalIncome'] + 1)
         
         # 2. Stability Score (Education + Married + Employment)
-        # We need numeric values for these to create interaction features
         df['StabilityScore'] = (
             (df['Education'] == 'Graduate').astype(int) * 2 + 
             (df['Married'] == 'Yes').astype(int) * 1 +
-            (df['Self_Employed'] == 'No').astype(int) * 1 # Regular employment seen as more "stable" by banks
+            (df['Self_Employed'] == 'No').astype(int) * 1
         )
         
-        # 3. Credit Stress Interaction
-        df['CreditStress'] = df['LoanAmount'] * (1 - df['Credit_History'].fillna(0))
+        # ===== NEW CREDIT INTELLIGENCE FEATURES =====
+        
+        # 3. Credit Grade (binned FICO score)
+        # 300-579: Poor (0), 580-669: Fair (1), 670-739: Good (2), 740-799: Very Good (3), 800-850: Exceptional (4)
+        df['Credit_Grade'] = pd.cut(
+            df['Credit_Score'],
+            bins=[0, 579, 669, 739, 799, 850],
+            labels=[0, 1, 2, 3, 4],
+            include_lowest=True
+        ).astype(float).fillna(1)  # Default to Fair for missing
+        
+        # 4. High Risk Utilization Flag (above 75% is danger zone)
+        df['HighRiskUtilization'] = (df['Credit_Utilization'] > 75).astype(int)
+        
+        # 5. Credit Score * Utilization Interaction
+        # Low score + high utilization = very bad. High score + low utilization = very good.
+        df['CreditHealthIndex'] = (df['Credit_Score'] / 850) * (1 - df['Credit_Utilization'] / 100)
+        
+        # 6. Credit Depth Score (open accounts sweet spot analysis)
+        # Best: 3-7 accounts. Penalize 0 (thin file) and >10 (overleveraged)
+        df['CreditDepthScore'] = df['Open_Accounts'].apply(
+            lambda x: 1.0 if 3 <= x <= 7 else (0.3 if x == 0 else (0.6 if x <= 10 else 0.4))
+        )
+        
+        # 7. CreditStress — replaces the old binary version
+        # High loan amount + low credit score + high utilization = maximum stress
+        df['CreditStress'] = (
+            (df['LoanAmount'] / (df['LoanAmount'].max() + 1)) *
+            (1 - df['Credit_Score'] / 850) *
+            (df['Credit_Utilization'] / 100)
+        )
+        
+        # 8. Affordability Index (combines income strength with credit health)
+        df['AffordabilityIndex'] = (
+            df['LogTotalIncome'] * 
+            (df['Credit_Score'] / 850) * 
+            (1 - df['Credit_Utilization'] / 200)  # Halved weight to keep it positive
+        )
+        
+        # ===== PAST LOAN HISTORY FEATURES =====
+        
+        # 9. Loan History Score — composite score combining repayment rate,
+        #    default count, and borrowing experience (0 to 1 scale)
+        df['LoanHistoryScore'] = (
+            df['Repayment_Rate'] * 0.5 +
+            (1 - df['Prev_Loan_Defaults'].clip(0, 5) / 5) * 0.3 +
+            df['Prev_Loan_Count'].clip(0, 8) / 8 * 0.2
+        )
+        
+        # 10. Repeat Borrower Flag — binary flag for experienced borrowers (2+ past loans)
+        df['RepeatBorrowerFlag'] = (df['Prev_Loan_Count'] >= 2).astype(int)
+        
+        # 11. Default Risk Index — penalizes high defaults relative to total loans
+        #     Higher = worse (more defaults relative to total loans)
+        df['DefaultRiskIndex'] = df['Prev_Loan_Defaults'] / (df['Prev_Loan_Count'] + 1)
+        
+        # 12. Experienced Borrower — interaction: experienced borrower × good credit
+        #     Rewards people who have repaid many loans AND have high credit scores
+        df['ExperiencedBorrower'] = (
+            (df['Prev_Loan_Count'] / 8) *
+            df['Repayment_Rate'] *
+            (df['Credit_Score'] / 850)
+        )
         
         return df
     

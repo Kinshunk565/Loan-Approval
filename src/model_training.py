@@ -134,11 +134,6 @@ class ModelTrainer:
         models = self.define_models()
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
         
-    def train_all(self, X_train, X_test, y_train, y_test):
-        """Train all models with GridSearchCV and evaluate."""
-        models = self.define_models()
-        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-        
         print("=" * 70)
         print("LOAN APPROVAL PREDICTION — MODEL TRAINING PIPELINE")
         print("=" * 70)
@@ -255,7 +250,7 @@ class ModelTrainer:
         if auc_v > best_auc:
             self.best_model_name = 'Voting Ensemble'
             self.best_model = voting_clf
-            print(f"⭐ Voting Ensemble is now the best model! (AUC: {auc_v:.4f})")
+            print(f"[BEST] Voting Ensemble is now the best model! (AUC: {auc_v:.4f})")
         
         print(f"\n{'=' * 70}")
         print(f"FINAL BEST MODEL: {self.best_model_name} (AUC: {max(best_auc, auc_v):.4f})")
